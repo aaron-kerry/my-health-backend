@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
 class Utilisateur(AbstractUser):
     TYPES = (
@@ -10,6 +11,23 @@ class Utilisateur(AbstractUser):
     type = models.CharField(max_length=20, choices=TYPES)
     date_naissance = models.DateField(null=True, blank=True)
     telephone = models.CharField(max_length=20, null=True, blank=True)
+
+class Patient(models.Model):
+    utilisateur = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='patient_profile')
+    
+    groupe_sanguin = models.CharField(max_length=3)
+    adresse = models.TextField(blank=True, null=True)
+    sexe = models.CharField(max_length=10, choices=[('M', 'Masculin'), ('F', 'Féminin'), ('Autre', 'Autre')], blank=True, null=True)
+    profession = models.CharField(max_length=100, blank=True, null=True)
+    assurance_maladie = models.CharField(max_length=50, blank=True, null=True)
+    allergies = models.TextField(blank=True, null=True)
+    antecedents = models.TextField(blank=True, null=True)
+    contact_urgence_nom = models.CharField(max_length=100, blank=True, null=True)
+    contact_urgence_telephone = models.CharField(max_length=20, blank=True, null=True)
+
+    def __str__(self):
+        return f"Profil Patient: {self.utilisateur.get_full_name()}"
+
 
 class RendezVous(models.Model):
     STATUTS = (
