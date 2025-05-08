@@ -8,13 +8,18 @@ class Utilisateur(AbstractUser):
         ('Professionnel', 'Professionnel'),
         ('Admin', 'Admin')
     )
+    nom = models.CharField(max_length=50, db_column='nom')
+    prenom = models.CharField(max_length=50, db_column='prenom')
+    username = models.CharField(max_length=150, unique=True, db_column='pseudo')
+    email = models.EmailField(unique=True, verbose_name='email')
     type = models.CharField(max_length=20, choices=TYPES)
     date_naissance = models.DateField(null=True, blank=True)
     telephone = models.CharField(max_length=20, null=True, blank=True)
+    class Meta:
+        db_table = 'utilisateur' 
 
 class Patient(models.Model):
     utilisateur = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='patient_profile')
-    
     groupe_sanguin = models.CharField(max_length=3)
     adresse = models.TextField(blank=True, null=True)
     sexe = models.CharField(max_length=10, choices=[('M', 'Masculin'), ('F', 'Féminin'), ('Autre', 'Autre')], blank=True, null=True)
@@ -59,7 +64,9 @@ class TraitementMedical(models.Model):
     date_fin = models.DateField(null=True, blank=True)
 
 class Specialite(models.Model):
+    utilisateur = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='specialiste_profile')
     nom = models.CharField(max_length=100)
+
 
 class Visite(models.Model):
     patient = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)

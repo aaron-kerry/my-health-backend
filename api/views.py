@@ -8,8 +8,12 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets, permissions
 from .models import Utilisateur, RendezVous, DonDeSang, TraitementMedical, Specialite, Visite
-
-
+from rest_framework.permissions import AllowAny
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .serializers import UtilisateurSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
 
 # @method_decorator(csrf_exempt, name='dispatch')
 class UtilisateurViewSet(viewsets.ModelViewSet):
@@ -21,7 +25,7 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
-    permission_classes = [permissions.IsAuthenticated]  
+    permission_classes = [permissions.AllowAny]  
 
 
 class RendezVousViewSet(viewsets.ModelViewSet):
@@ -49,12 +53,35 @@ class VisiteViewSet(viewsets.ModelViewSet):
     serializer_class = VisiteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-class RegisterView(APIView):
-    permission_classes = []  
+# class RegisterView(APIView):
+#     permission_classes = [AllowAny]  
 
-    def post(self, request):
-        serializer = UtilisateurSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     def post(self, request):
+#         serializer = UtilisateurSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# views.py
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+class RegisterView(generics.CreateAPIView):
+    serializer_class = UtilisateurSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {
+                "user": serializer.data,
+                "message": "Utilisateur créé avec succès",
+            },
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )

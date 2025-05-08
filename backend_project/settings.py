@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'corsheaders',
+    'drf_yasg',
 ]
 
 AUTH_USER_MODEL = 'api.Utilisateur'
@@ -82,17 +83,10 @@ WSGI_APPLICATION = 'backend_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-<<<<<<< HEAD
-        'NAME': 'myhealth_db',
-        'USER': 'utilisateur_mysql',
-        'PASSWORD': 'mot_de_passe',
-        'HOST': 'localhost',
-=======
         'NAME': 'my_health_db',  
         'USER': 'root',          
         'PASSWORD': '',          
         'HOST': '127.0.0.1',
->>>>>>> 3cdeaf7cc7d1152c14ae92f81c36d4361d0a5351
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -157,6 +151,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ]
+}
+
+SIMPLE_JWT = {
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'TOKEN_OBTAIN_SERIALIZER': 'api.serializers.CustomTokenObtainPairSerializer',
 }
 
 CORS_ALLOW_ALL_ORIGINS = True

@@ -1,31 +1,38 @@
 from rest_framework import serializers
 from .models import Utilisateur, RendezVous, DonDeSang, TraitementMedical, Specialite, Visite, Patient 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UtilisateurSerializer(serializers.ModelSerializer):
-    prenom = serializers.CharField(source='first_name')
-    nom = serializers.CharField(source='last_name')
-    mot_de_passe = serializers.CharField(write_only=True, source='password')
+    password = serializers.CharField(write_only=True)
 
     class Meta:
-        model = Utilisateur
-        fields = [
-            'id', 'username', 'email', 'prenom', 'nom',
-            'mot_de_passe', 'type', 'date_naissance', 'telephone'
-        ]
+        model = Utilisateur  # Vous devez spécifier le modèle
+        fields = ['id', 'username', 'nom', 'prenom', 'email', 'type', 'date_naissance', 'telephone', 'password']  # Ou listez les champs explicitement
+
 
     def create(self, validated_data):
         password = validated_data.pop('password')
-        first_name = validated_data.pop('first_name')
-        last_name = validated_data.pop('last_name')
-
+        prenom = validated_data.pop('prenom')
+        nom = validated_data.pop('nom')
+        
         user = Utilisateur.objects.create_user(
             password=password,
-            first_name=first_name,
-            last_name=last_name,
+            prenom=prenom,
+            nom=nom,
             **validated_data
         )
         return user
 
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        
+        # Ajoutez des claims personnalisés
+        token['type'] = user.type
+        token['email'] = user.username
+        token['mot_de_passe'] = user.email
+        return token
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
